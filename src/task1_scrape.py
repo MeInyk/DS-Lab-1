@@ -22,7 +22,13 @@ def fetch_wikipedia_page(url: str) -> str:
         requests.HTTPError: If the HTTP request returned an unsuccessful status code.
         requests.RequestException: If there was a network error.
     """
-    pass
+    headers = {
+        "User-Agent": "DS-Lab-1/1.0 (educational Python project)"
+    }
+
+    response = requests.get(url, headers=headers, timeout=10)
+    response.raise_for_status()
+    return response.text
 
 
 def extract_title(soup: BeautifulSoup) -> str:
@@ -35,7 +41,12 @@ def extract_title(soup: BeautifulSoup) -> str:
     Returns:
         str: The title of the page.
     """
-    pass
+    title_element = soup.find("h1", id="firstHeading")
+
+    if title_element is None:
+        return ""
+
+    return title_element.get_text(strip=True)
 
 
 def extract_first_sentence(soup: BeautifulSoup) -> str:
@@ -48,7 +59,26 @@ def extract_first_sentence(soup: BeautifulSoup) -> str:
     Returns:
         str: The first sentence of the first paragraph.
     """
-    pass
+    content = soup.find("div", class_="mw-parser-output")
+
+    if content is None:
+        content = soup
+
+    for paragraph in content.find_all("p"):
+        text = paragraph.get_text(" ", strip=True)
+
+        if not text:
+            continue
+
+        sentences = text.split(". ", 1)
+        first_sentence = sentences[0].strip()
+
+        if len(sentences) > 1:
+            first_sentence += "."
+
+        return first_sentence
+
+    return ""
 
 
 if __name__ == "__main__":

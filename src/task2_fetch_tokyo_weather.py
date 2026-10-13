@@ -22,7 +22,18 @@ def fetch_weather_data() -> Dict[str, any]:
     url = ("https://api.open-meteo.com/v1/forecast?latitude=35.6895&longitude=139.6917"
            "&daily=temperature_2m_max&timezone=Asia/Tokyo")
     
-    pass
+    response = requests.get(url, timeout=10)
+    response.raise_for_status()
+
+    data = response.json()
+
+    date = data["daily"]["time"][0]
+    max_temperature = data["daily"]["temperature_2m_max"][0]
+
+    return {
+        "date": date,
+        "max_temperature": max_temperature
+    }
 
 
 if __name__ == "__main__":

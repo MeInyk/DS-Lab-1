@@ -20,7 +20,33 @@ def analyze_daily_weather(day: Dict[str, Any], temp_threshold: float = 30,
     Returns:
         dict: A dictionary with analysis results for the day.
     """
-    pass
+    max_temp = day["max_temperature"]
+    min_temp = day["min_temperature"]
+    wind_speed = day["wind_speed"]
+    humidity = day["humidity"]
+    precipitation = day["precipitation"]
+
+    temperature_swing = max_temp - min_temp
+
+    if precipitation == 0:
+        rain_severity = "No rain"
+    elif precipitation < 5:
+        rain_severity = "Light rain"
+    elif precipitation < 10:
+        rain_severity = "Moderate rain"
+    else:
+        rain_severity = "Heavy rain"
+
+    return {
+        **day,
+        "temperature_swing": temperature_swing,
+        "is_hot_day": max_temp > temp_threshold,
+        "significant_swing": temperature_swing > 10,
+        "is_windy_day": wind_speed > wind_threshold,
+        "is_uncomfortable_day": humidity > humidity_threshold,
+        "is_rainy_day": precipitation > 0,
+        "rain_severity": rain_severity
+    }
 
 
 def generate_daily_report(analysis: Dict[str, Any]) -> str:
@@ -33,7 +59,35 @@ def generate_daily_report(analysis: Dict[str, Any]) -> str:
     Returns:
         str: A detailed report as a string.
     """
-    pass
+    report = [
+        f"Date: {analysis['date']}",
+        f"Weather: {analysis['weather_description']}",
+        (
+            f"Temperature: Max {analysis['max_temperature']:.1f}°C, "
+            f"Min {analysis['min_temperature']:.1f}°C "
+            f"(Swing: {analysis['temperature_swing']:.1f}°C)"
+        )
+    ]
+
+    if analysis["is_hot_day"]:
+        report.append("It was a hot day.")
+
+    if analysis.get("significant_swing", False):
+        report.append("There was a significant temperature swing.")
+
+    if analysis["is_windy_day"]:
+        report.append("It was a windy day.")
+
+    if analysis["is_uncomfortable_day"]:
+        report.append("The humidity made the day uncomfortable.")
+
+    if analysis["is_rainy_day"]:
+        rain_severity = analysis.get("rain_severity", "Rain")
+        report.append(f"It was a rainy day. Rain severity: {rain_severity}.")
+    else:
+        report.append("There was no precipitation.")
+
+    return "\n".join(report) + "\n"
 
 
 def summarize_weather_analysis(analyses: List[Dict[str, Any]]) -> str:
@@ -46,7 +100,35 @@ def summarize_weather_analysis(analyses: List[Dict[str, Any]]) -> str:
     Returns:
         str: A summary report as a string.
     """
-    pass
+    if not analyses:
+        return "No weather data available."
+
+    hottest = max(analyses, key=lambda day: day["max_temperature"])
+    windiest = max(analyses, key=lambda day: day["wind_speed"])
+    most_humid = max(analyses, key=lambda day: day["humidity"])
+    rainiest = max(analyses, key=lambda day: day["precipitation"])
+
+    summary = [
+        "Weather Summary:",
+        (
+            f"Hottest day: {hottest['date']} with a maximum "
+            f"temperature of {hottest['max_temperature']:.1f}°C"
+        ),
+        (
+            f"Windiest day: {windiest['date']} with wind speeds "
+            f"of {windiest['wind_speed']:.1f} km/h"
+        ),
+        (
+            f"Most humid day: {most_humid['date']} with a "
+            f"humidity level of {most_humid['humidity']}%"
+        ),
+        (
+            f"Rainiest day: {rainiest['date']} with "
+            f"{rainiest['precipitation']:.1f} mm of precipitation"
+        )
+    ]
+
+    return "\n".join(summary)
 
 
 if __name__ == "__main__":

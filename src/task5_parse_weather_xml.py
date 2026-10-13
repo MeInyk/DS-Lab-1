@@ -17,7 +17,22 @@ def parse_weather_xml(xml_file: str) -> List[Dict[str, any]]:
         FileNotFoundError: If the XML file does not exist.
         ET.ParseError: If the XML file is malformed.
     """
-    pass
+    with open(xml_file, "r", encoding="utf-8") as file:
+        tree = ET.parse(file)
+
+    root = tree.getroot()
+    weather_data = []
+
+    for day in root.findall("day"):
+        weather_data.append({
+            "date": day.findtext("date"),
+            "temperature": float(day.findtext("temperature")),
+            "humidity": int(day.findtext("humidity")),
+            "precipitation": float(day.findtext("precipitation"))
+        })
+
+    return weather_data
+
 
 
 def save_to_csv(data: List[Dict[str, any]], filename: str = "parsed_weather_data.csv") -> None:
@@ -31,7 +46,18 @@ def save_to_csv(data: List[Dict[str, any]], filename: str = "parsed_weather_data
     Raises:
         IOError: If there is an error writing to the file.
     """
-    pass
+    with open(filename, "w", newline="", encoding="utf-8") as file:
+        writer = csv.writer(file)
+
+        writer.writerow(["Date", "Temperature", "Humidity", "Precipitation"])
+
+        for day in data:
+            writer.writerow([
+                day["date"],
+                day["temperature"],
+                day["humidity"],
+                day["precipitation"]
+            ])
 
 
 if __name__ == "__main__":
